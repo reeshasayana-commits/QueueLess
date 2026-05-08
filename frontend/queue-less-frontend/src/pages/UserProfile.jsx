@@ -1,0 +1,454 @@
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Card, Form, Button, Alert, Container, Row, Col, Modal , Spinner} from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { logout, updatePreferences } from '../redux/authSlice'; // import updatePreferences
+import { authService } from '../services/authService';
+import { toast } from 'react-toastify';
+import './UserProfile.css';
+
+const UserProfile = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { name: currentName, phoneNumber: currentPhoneNumber, profileImageUrl: currentProfileImageUrl, preferences: currentPreferences } = useSelector((state) => state.auth);
+    const [name, setName] = useState(currentName || '');
+    const [phoneNumber, setPhoneNumber] = useState(currentPhoneNumber || '');
+    const [profileImageUrl, setProfileImageUrl] = useState(currentProfileImageUrl || '');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+     const [uploadingImage, setUploadingImage] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [deleteWarning, setDeleteWarning] = useState(false);
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
+    const [preferences, setPreferences] = useState({
+        emailNotifications: true,
+        smsNotifications: false,
+        pushNotifications: true,
+        language: 'en',
+        defaultSearchRadius: 5,
+        darkMode: false,
+        favoritePlaceIds: []
+    });
+
+     const apiBaseUrl =  '';
+// Helper to get initials
+    const getInitials = (fullName) =>
+        fullName
+            ? fullName
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+            : '';
+
+    // Fallback image (initials on colored background)
+    const getFallbackImage = () => {
+        const initials = getInitials(name);
+        return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="100%" height="100%" fill="%234f46e5"/><text x="50%" y="50%" font-family="Arial, sans-serif" font-size="40" fill="white" text-anchor="middle" dy=".3em">${initials}</text></svg>`;
+    };
+
+    // Construct full image URL – only prepend backend base if it's an uploaded image (starts with /uploads/)
+    const fullImageUrl = profileImageUrl
+        ? (profileImageUrl.startsWith('/uploads/')
+            ? `${apiBaseUrl}${profileImageUrl}`
+            : profileImageUrl)
+        : null;
+
+    // Premium avatar collection
+    const premiumAvatars = [
+        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1527980965255-d3b416303d12?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1640951613773-54706e06851d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
+        'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
+    ];
+
+    useEffect(() => {
+        if (currentPreferences) {
+            setPreferences(currentPreferences);
+        }
+    }, [currentPreferences]);
+
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await authService.updateProfile({ name, phoneNumber, profileImageUrl });
+            toast.success('Profile updated successfully!');
+            dispatch({ type: 'auth/updateProfile', payload: { name, phoneNumber, profileImageUrl } });
+        } catch (error) {
+            toast.error('Failed to update profile.');
+            console.error('Profile update error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please select an image file');
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('File size must be less than 2MB');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setUploadingImage(true);
+        try {
+            const response = await authService.uploadProfileImage(formData);
+            const newImageUrl = response.data.imageUrl;
+            setProfileImageUrl(newImageUrl);
+            dispatch({ type: 'auth/updateProfile', payload: { profileImageUrl: newImageUrl } });
+            toast.success('Profile image uploaded successfully');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to upload image');
+        } finally {
+            setUploadingImage(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        setPasswordError('');
+
+        if (newPassword !== confirmNewPassword) {
+            setPasswordError('New passwords do not match.');
+            return;
+        }
+        if (newPassword.length < 8) {
+            setPasswordError('New password must be at least 8 characters.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await authService.changePassword({ currentPassword, newPassword });
+            toast.success('Password changed successfully!');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmNewPassword('');
+        } catch (error) {
+            setPasswordError(error.message || 'Failed to change password.');
+            console.error('Password change error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!deleteWarning) {
+            setDeleteWarning(true);
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            await authService.deleteAccount();
+            toast.success('Account deleted successfully. You will be logged out.');
+            dispatch(logout());
+            navigate('/');
+        } catch (error) {
+            toast.error('Failed to delete account.');
+            console.error('Account deletion error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const selectAvatar = (avatarUrl) => {
+        setProfileImageUrl(avatarUrl);
+        setShowAvatarModal(false);
+    };
+
+    const handleSavePreferences = async () => {
+        setIsSubmitting(true);
+        try {
+            dispatch(updatePreferences(preferences));
+            toast.success('Preferences saved!');
+        } catch (error) {
+            toast.error('Failed to save preferences.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+    
+    return (
+        <Container className="user-profile-container">
+            <h1 className="text-center mb-4 profile-title">My Profile</h1>
+            <Row className="justify-content-center">
+                <Col md={8} lg={6}>
+                    {/* Profile Image Section */}
+                    <Card className="shadow-lg mb-4 profile-card">
+                        <Card.Body className="p-4">
+                            <h4 className="card-title text-center mb-4 section-title">Profile Picture</h4>
+                            <div className="text-center mb-4">
+                                <div className="avatar-preview-wrapper">
+                                    <img
+                                        src={fullImageUrl ? `${fullImageUrl}?t=${Date.now()}` : getFallbackImage()}
+                                        alt="Profile"
+                                        className="profile-img-preview"
+                                        onError={(e) => { e.target.src = getFallbackImage(); }}
+                                    />
+                                    <div className="avatar-overlay" onClick={() => setShowAvatarModal(true)}>
+                                        <i className="fas fa-camera"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="d-grid gap-2">
+                                <Button
+    variant="outline-primary"
+    className="avatar-select-btn"
+    onClick={() => setShowAvatarModal(true)}
+>
+    <i className="fas fa-user-circle me-2"></i>Choose from Premium Avatars
+</Button>
+                            </div>
+                            <input
+                                type="file"
+                                id="profile-image-upload"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={handleImageUpload}
+                            />
+                           <Button
+    onClick={() => document.getElementById('profile-image-upload').click()}
+    disabled={uploadingImage}
+    className="w-100 mt-3 upload-btn"
+>
+    {uploadingImage ? <Spinner animation="border" size="sm" /> : <i className="fas fa-upload me-2"></i>}
+    {uploadingImage ? 'Uploading...' : 'Upload New Image'}
+</Button>
+                            <div className="divider">
+                                <span>OR</span>
+                            </div>
+
+                            <Form.Group controlId="formProfileImageUrl" className="mb-3">
+                                <Form.Label>Enter Custom Image URL</Form.Label>
+                                <div className="input-with-icon">
+                                    <i className="fas fa-link"></i>
+                                    <Form.Control
+                                        type="url"
+                                        placeholder="https://example.com/your-image.jpg"
+                                        value={profileImageUrl}
+                                        onChange={(e) => setProfileImageUrl(e.target.value)}
+                                    />
+                                </div>
+                            </Form.Group>
+                        </Card.Body>
+                    </Card>
+
+                    {/* Basic Info Section */}
+                    <Card className="shadow-lg mb-4 profile-card">
+                        <Card.Body className="p-4">
+                            <h4 className="card-title section-title">Personal Information</h4>
+                            <Form onSubmit={handleProfileUpdate}>
+                                <Form.Group className="mb-3" controlId="formName">
+                                    <Form.Label>Full Name</Form.Label>
+                                    <div className="input-with-icon">
+                                        <i className="fas fa-user"></i>
+                                        <Form.Control
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                        />
+                                    </div>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="formPhoneNumber">
+                                    <Form.Label>Phone Number</Form.Label>
+                                    <div className="input-with-icon">
+                                        <i className="fas fa-phone"></i>
+                                        <Form.Control
+                                            type="text"
+                                            value={phoneNumber}
+                                            onChange={(e) => setPhoneNumber(e.target.value)}
+                                            placeholder='Enter Your Phone Number'
+                                            minLength={10}
+                                            maxLength={15}
+                                            required
+                                        />
+                                    </div>
+                                </Form.Group>
+                                <div className="d-grid">
+                                    <Button
+                                        variant="primary"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="update-btn"
+                                    >
+                                        {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+
+                    {/* Password Change Section */}
+                    <Card className="shadow-lg mb-4 profile-card">
+                        <Card.Body className="p-4">
+                            <h4 className="card-title section-title">Change Password</h4>
+                            <Form onSubmit={handleChangePassword}>
+                                <Form.Group className="mb-3" controlId="formCurrentPassword">
+                                    <Form.Label>Current Password</Form.Label>
+                                    <div className="input-with-icon">
+                                        <i className="fas fa-lock"></i>
+                                        <Form.Control
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            required
+                                            placeholder='Enter Your Current Password'
+                                        />
+                                    </div>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="formNewPassword">
+                                    <Form.Label>New Password</Form.Label>
+                                    <div className="input-with-icon">
+                                        <i className="fas fa-key"></i>
+                                        <Form.Control
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder='Enter New Password'
+                                            required
+                                        />
+                                    </div>
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="formConfirmPassword">
+                                    <Form.Label>Confirm New Password</Form.Label>
+                                    <div className="input-with-icon">
+                                        <i className="fas fa-check-circle"></i>
+                                        <Form.Control
+                                            type="password"
+                                            value={confirmNewPassword}
+                                            onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                            placeholder='Re-Entered New Password To Confirm'
+                                            required
+                                        />
+                                    </div>
+                                </Form.Group>
+                                {passwordError && <Alert variant="danger" className="mt-3">{passwordError}</Alert>}
+                                <div className="d-grid">
+                                    <Button
+                                        variant="warning"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="password-btn"
+                                    >
+                                        {isSubmitting ? 'Changing...' : 'Change Password'}
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+
+                    {/* Notification Preferences Section */}
+                    <Card className="shadow-lg mb-4 profile-card">
+                        <Card.Body className="p-4">
+                            <h4 className="card-title section-title">Notification Preferences</h4>
+                            <Form>
+                                <Form.Group className="mb-3">
+                                    <Form.Check
+                                        type="switch"
+                                        label="Email Notifications"
+                                        checked={preferences.emailNotifications}
+                                        onChange={(e) => setPreferences({ ...preferences, emailNotifications: e.target.checked })}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Check
+                                        type="switch"
+                                        label="SMS Notifications"
+                                        checked={preferences.smsNotifications}
+                                        onChange={(e) => setPreferences({ ...preferences, smsNotifications: e.target.checked })}
+                                    />
+                                </Form.Group>
+                                <Form.Group className="mb-3">
+                                    <Form.Check
+                                        type="switch"
+                                        label="Push Notifications"
+                                        checked={preferences.pushNotifications}
+                                        onChange={(e) => setPreferences({ ...preferences, pushNotifications: e.target.checked })}
+                                    />
+                                    <Form.Text className="text-muted">
+                                        Receive push notifications when your token is about to be served.
+                                    </Form.Text>
+                                </Form.Group>
+                                <div className="d-grid">
+                                    <Button variant="primary" className='update-btn' onClick={handleSavePreferences} disabled={isSubmitting}>
+                                        {isSubmitting ? 'Saving...' : 'Save Preferences'}
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Card.Body>
+                    </Card>
+
+                    {/* Account Management Section */}
+                    <Card className="shadow-lg mb-4 profile-card account-management">
+                        <Card.Body className="p-4">
+                            <h4 className="card-title section-title text-danger">Account Management</h4>
+                            <p className="text-muted">
+                                Deleting your account is permanent and cannot be undone. All your data will be erased.
+                            </p>
+                            <div className="d-grid">
+                                <Button
+                                    variant={deleteWarning ? 'danger' : 'outline-danger'}
+                                    onClick={handleDeleteAccount}
+                                    disabled={isSubmitting}
+                                    className="delete-btn"
+                                >
+                                    <i className="fas fa-trash-alt me-2"></i>
+                                    {deleteWarning ? 'Click again to confirm deletion' : 'Delete Account'}
+                                </Button>
+                            </div>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Avatar Selection Modal */}
+             <Modal show={showAvatarModal} onHide={() => setShowAvatarModal(false)} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Choose Your Avatar</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        {premiumAvatars.map((avatar, index) => (
+                            <Col xs={4} md={3} key={index} className="mb-3 text-center">
+                                <div
+                                    className={`avatar-option ${profileImageUrl === avatar ? 'selected' : ''}`}
+                                    onClick={() => selectAvatar(avatar)}
+                                >
+                                    <img src={avatar} alt={`Avatar ${index + 1}`} />
+                                </div>
+                            </Col>
+                        ))}
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAvatarModal(false)}>
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </Container>
+    );
+};
+
+export default UserProfile;

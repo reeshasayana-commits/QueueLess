@@ -1,0 +1,190 @@
+/* HowToUse.css – Premium styling, fully scoped to .how-to-use-page */
+
+.how-to-use-page {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+/* Gradient text for headings */
+.how-to-use-page .gradient-text {
+  background: linear-gradient(135deg, var(--search-primary), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Role cards */
+.how-to-use-page .role-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.how-to-use-page .role-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--search-primary);
+}
+.how-to-use-page .role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+.how-to-use-page .user-icon {
+  color: var(--link-color);
+}
+.how-to-use-page .provider-icon {
+  color: var(--success-color);
+}
+.how-to-use-page .admin-icon {
+  color: var(--danger-color);
+}
+.how-to-use-page .role-card:hover .role-icon {
+  transform: scale(1.1);
+  background: var(--border-color);
+}
+
+/* Custom Accordion */
+.how-to-use-page .custom-accordion .accordion-item {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.how-to-use-page .custom-accordion .accordion-header {
+  background-color: var(--bg-secondary);
+  border-radius: 16px;
+  margin: 0;
+}
+.how-to-use-page .custom-accordion .accordion-button {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.2rem;
+  padding: 1.2rem 1.5rem;
+  transition: all 0.2s;
+}
+.how-to-use-page .custom-accordion .accordion-button:not(.collapsed) {
+  background-color: var(--bg-secondary);
+  color: var(--search-primary);
+  box-shadow: none;
+}
+.how-to-use-page .custom-accordion .accordion-button:focus {
+  box-shadow: none;
+  border-color: transparent;
+}
+.how-to-use-page .custom-accordion .accordion-button::after {
+  filter: invert(var(--dark-mode-invert, 0));
+  transition: transform 0.2s;
+}
+.how-to-use-page .custom-accordion .accordion-body {
+  padding: 1.5rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Pro tips card */
+.how-to-use-page .pro-tips-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+}
+.how-to-use-page .pro-tips-card .card-body {
+  padding: 2rem;
+}
+.how-to-use-page .pro-tips-card h5 {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.how-to-use-page .pro-tips-card ul li {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .how-to-use-page .role-card {
+    margin-bottom: 1.5rem;
+  }
+  .how-to-use-page .custom-accordion .accordion-button {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+  .how-to-use-page .pro-tips-card .card-body {
+    padding: 1.5rem;
+  }
+}
+
+/* Dark mode overrides (scoped) */
+.dark-mode .how-to-use-page .role-card,
+.dark-mode .how-to-use-page .pro-tips-card,
+.dark-mode .how-to-use-page .custom-accordion .accordion-item,
+.dark-mode .how-to-use-page .custom-accordion .accordion-button,
+.dark-mode .how-to-use-page .custom-accordion .accordion-body,
+.dark-mode .how-to-use-page .alert {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+.dark-mode .how-to-use-page .role-card .card-title,
+.dark-mode .how-to-use-page .role-card .card-text,
+.dark-mode .how-to-use-page .pro-tips-card h5,
+.dark-mode .how-to-use-page .pro-tips-card ul li {
+  color: var(--text-primary);
+}
+.dark-mode .how-to-use-page .role-card .card-text {
+  color: var(--text-secondary);
+}
+.dark-mode .how-to-use-page .custom-accordion .accordion-button {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary) !important;
+}
+.dark-mode .how-to-use-page .custom-accordion .accordion-button:not(.collapsed) {
+  color: var(--search-primary);
+}
+.dark-mode .how-to-use-page .custom-accordion .accordion-button::after {
+  filter: invert(var(--dark-mode-invert));
+}
+.dark-mode .how-to-use-page .alert-info {
+  background-color: rgba(102, 126, 234, 0.2) !important;
+  border-color: var(--search-primary) !important;
+  color: var(--text-primary) !important;
+}
+.dark-mode .how-to-use-page .alert-warning {
+  background-color: rgba(241, 196, 15, 0.2) !important;
+  border-color: #f1c40f !important;
+  color: var(--text-primary) !important;
+}
+.dark-mode .how-to-use-page .pro-tips-card {
+  background-color: var(--bg-secondary) !important;
+}
+.dark-mode .how-to-use-page .pro-tips-card ul li {
+  color: var(--text-secondary);
+}
+.dark-mode .how-to-use-page .alert .text-primary,
+.dark-mode .how-to-use-page .alert .text-success,
+.dark-mode .how-to-use-page .alert .text-warning {
+  color: inherit !important;
+}
+.dark-mode .how-to-use-page .role-card,
+.dark-mode .how-to-use-page .custom-accordion .accordion-item {
+  box-shadow: var(--shadow-sm);
+}
+
+.how-to-use-page .lead.text-muted,
+.how-to-use-page .text-muted {
+    color: var(--text-secondary) !important;
+}

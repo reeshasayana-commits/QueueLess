@@ -1,0 +1,46 @@
+# Environment variables
+.env
+*.env
+!.env.example
+
+# Firebase & Secrets
+firebase-service-account.json
+**/firebase-service-account.json
+ssl/
+*.pem
+*.p12
+*.jks
+
+# Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mtj.tmp/
+.gradle/
+build/
+
+# Node
+node_modules/
+dist/
+build/
+.npm
+.eslintcache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+docker/data/

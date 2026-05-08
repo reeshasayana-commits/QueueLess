@@ -1,0 +1,259 @@
+Documentation.css – Premium styling, fully scoped to .documentation-page
+
+.documentation-page {
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    padding-top: 1rem;
+}
+
+/* Grid layout – replaces Bootstrap row/col */
+.documentation-page .doc-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Sidebar – sticky */
+.documentation-page .doc-sidebar {
+    position: relative;
+}
+
+.documentation-page .toc-card.sticky-toc {
+    position: sticky;
+    top: 100px;
+    z-index: 100;
+}
+
+/* Main content – no special positioning needed */
+.documentation-page .doc-main {
+    min-width: 0;
+}
+
+/* TOC card styling (including scroll) */
+.documentation-page .toc-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: var(--shadow-md);
+    transition: box-shadow 0.2s;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.documentation-page .toc-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Custom scrollbar for WebKit browsers */
+.documentation-page .toc-card::-webkit-scrollbar {
+    width: 6px;
+}
+.documentation-page .toc-card::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+.documentation-page .toc-card::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+.documentation-page .toc-card::-webkit-scrollbar-thumb:hover {
+    background: var(--search-primary);
+}
+
+.documentation-page .toc-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--search-primary);
+    display: inline-block;
+}
+
+.documentation-page .toc-list .list-group-item {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.documentation-page .toc-list .list-group-item:hover {
+    color: var(--search-primary);
+    transform: translateX(4px);
+}
+.documentation-page .toc-list .list-group-item.active {
+    color: var(--search-primary);
+    font-weight: 600;
+    background: transparent;
+    border-left: 3px solid var(--search-primary);
+    padding-left: 0.5rem;
+}
+
+/* Main content sections */
+.documentation-page .doc-section {
+    scroll-margin-top: 80px;
+    margin-bottom: 3rem;
+}
+
+.documentation-page .doc-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.documentation-page .doc-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.documentation-page .doc-section h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--search-primary), #4a6fdc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1rem;
+}
+.documentation-page .doc-card h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    border-left: 4px solid var(--search-primary);
+    padding-left: 1rem;
+}
+.documentation-page .doc-card h5 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+    color: var(--text-primary);
+}
+.documentation-page .doc-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+.documentation-page .doc-card ul,
+.documentation-page .doc-card ol {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+.documentation-page .doc-card li {
+    margin-bottom: 0.5rem;
+}
+.documentation-page .doc-card code {
+    background-color: var(--bg-secondary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+    color: var(--search-primary);
+}
+
+/* Code blocks */
+.documentation-page .code-block {
+    position: relative;
+    margin: 1rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+.documentation-page .code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+.documentation-page .code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+.documentation-page .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+.documentation-page .copy-btn:hover {
+    background: var(--search-primary);
+    color: white;
+    border-color: var(--search-primary);
+}
+
+/* FAQ items */
+.documentation-page .faq-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.documentation-page .faq-item:last-child {
+    border-bottom: none;
+}
+.documentation-page .faq-item h5 {
+    margin-top: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .documentation-page .doc-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .documentation-page .toc-card.sticky-toc {
+        position: static;
+        margin-bottom: 1rem;
+    }
+    .documentation-page .doc-card {
+        padding: 1.5rem;
+    }
+    .documentation-page .doc-section h1 {
+        font-size: 2rem;
+    }
+    .documentation-page .doc-card h2 {
+        font-size: 1.5rem;
+    }
+}
+@media (max-width: 768px) {
+    .documentation-page .doc-card {
+        padding: 1rem;
+    }
+    .documentation-page .code-block pre {
+        font-size: 0.75rem;
+    }
+}
+
+/* Dark mode specific adjustments (scoped) */
+.dark-mode .documentation-page .toc-card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+.dark-mode .documentation-page .doc-main .lead {
+    color: var(--text-primary) !important;
+}
+.dark-mode .documentation-page .lead {
+    color: var(--text-primary) !important;
+}
