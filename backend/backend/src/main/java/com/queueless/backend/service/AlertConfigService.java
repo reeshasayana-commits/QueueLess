@@ -66,7 +66,18 @@ public class AlertConfigService {
 
     public void toggleEnabled(String adminId, boolean enabled) {
         log.info("Toggling alerts for admin: {} to enabled={}", adminId, enabled);
-        AlertConfig config = getConfig(adminId);
+        AlertConfig config = alertConfigRepository.findByAdminId(adminId)
+                .orElseGet(() -> {
+                    log.debug("No existing config, creating a default enabled config for admin: {}", adminId);
+                    AlertConfig newConfig = new AlertConfig();
+                    newConfig.setAdminId(adminId);
+                    newConfig.setCreatedAt(LocalDateTime.now());
+                    
+                    User admin = userRepository.findById(adminId).orElse(null);
+                    newConfig.setNotificationEmail(admin != null ? admin.getEmail() : "admin@queueless.com");
+                    newConfig.setThresholdWaitTime(30); // Default threshold of 30 mins
+                    return newConfig;
+                });
         config.setEnabled(enabled);
         config.setUpdatedAt(LocalDateTime.now());
         alertConfigRepository.save(config);

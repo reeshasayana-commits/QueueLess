@@ -942,7 +942,12 @@ public class QueueService {
                 .filter(t -> TokenStatus.WAITING.toString().equals(t.getStatus()))
                 .count();
 
-        Service service = serviceService.getServiceById(queue.getServiceId());
+        Service service = null;
+        try {
+            service = serviceService.getServiceById(queue.getServiceId());
+        } catch (Exception e) {
+            log.warn("Service not found with ID {} for queue {}", queue.getServiceId(), queueId);
+        }
         Integer averageServiceTime = service != null ? service.getAverageServiceTime() : 5;
 
         return (int) (waitingTokens * averageServiceTime);

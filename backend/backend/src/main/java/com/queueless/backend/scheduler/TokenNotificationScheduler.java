@@ -57,7 +57,12 @@ public class TokenNotificationScheduler {
     private void processQueue(Queue queue) {
         if (!queue.getIsActive()) return;
 
-        Service service = serviceService.getServiceById(queue.getServiceId());
+        Service service = null;
+        try {
+            service = serviceService.getServiceById(queue.getServiceId());
+        } catch (Exception e) {
+            log.warn("Service not found with ID {} for queue {}", queue.getServiceId(), queue.getId());
+        }
         int avgServiceTime = service != null && service.getAverageServiceTime() != null
                 ? service.getAverageServiceTime() : 5;
 

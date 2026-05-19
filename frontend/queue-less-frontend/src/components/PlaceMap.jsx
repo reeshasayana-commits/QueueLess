@@ -41,7 +41,18 @@ const PlaceMap = () => {
   if (!places.length) return <Alert variant="info">No places found</Alert>;
 
   // Center map on first place or default to India
-  const center = places[0]?.location || [78.9629, 20.5937];
+  const getSafeLatLng = (loc) => {
+    if (!loc || !Array.isArray(loc) || loc.length < 2) return null;
+    let lng = Number(loc[0]);
+    let lat = Number(loc[1]);
+    if (isNaN(lng) || isNaN(lat)) return null;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return null;
+    }
+    return [lat, lng];
+  };
+
+  const center = (places[0]?.location && getSafeLatLng(places[0].location)) || [20.5937, 78.9629];
 
   const getMarkerSize = (total) => {
     if (total === 0) return 8;
@@ -77,11 +88,12 @@ const PlaceMap = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {places.map((place) => (
-            place.location && (
+          {places.map((place) => {
+            const latLng = getSafeLatLng(place.location);
+            return latLng && (
               <CircleMarker
                 key={place.id}
-                center={[place.location[1], place.location[0]]} // Leaflet uses [lat, lng]
+                center={latLng}
                 radius={getMarkerSize(place.totalActiveTokens)}
                 fillColor={getMarkerColor(place.totalActiveTokens)}
                 color="#000"
@@ -97,8 +109,8 @@ const PlaceMap = () => {
                   <strong>Total: {place.totalActiveTokens}</strong>
                 </Popup>
               </CircleMarker>
-            )
-          ))}
+            );
+          })}
         </MapContainer>
       </Card.Body>
     </Card>
